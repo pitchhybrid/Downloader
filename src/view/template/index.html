@@ -1,0 +1,162 @@
+<div class="read-section sidebar-main" style="left: -500px;" id="templateSideBar">
+    <div class="sidebar-header">
+        <button class="sidebar-header-button" style="float: left; margin: 0 20px;" id="sidebarZIP">ZIP</button>
+        <p id="headerDownloader" style="text-align: center;color: #fff;position: absolute; right: 45%; top: 10px;"></p>
+        <button class="sidebar-header-button" style="float: right;margin: 0 20px;" id="sidebarCBZ">CBZ</button>
+    </div>
+    <div class="sidebar-content">
+        <div class="mCustomScrollBox"
+            style="overflow-y: overlay;overflow-x: hidden; width: auto; height: 860px;padding: 15px;">
+            <ul id="sidebarList" style="width: 100%;"></ul>
+        </div>
+    </div>
+    <div class="sidebar-btn" id="sidebarBTN">
+        章<br>节
+    </div>
+</div>
+
+<style>
+    .progress-k {
+        padding: 3px;
+        width: 100%;
+        max-width: 99%;
+        background-color: #009688;
+        border-radius: 2px;
+        height: 2.5px;
+    }
+
+    body::-webkit-scrollbar-track-piece,
+    body ::-webkit-scrollbar-track-piece {
+        background-color: transparent
+    }
+
+    body::-webkit-scrollbar,
+    body ::-webkit-scrollbar {
+        width: 8px;
+        height: 4px
+    }
+
+    body::-webkit-scrollbar-thumb,
+    body ::-webkit-scrollbar-thumb {
+        background-color: #ddd;
+        background-clip: padding-box;
+        min-height: 28px;
+        border-radius: 4px
+    }
+
+    body::-webkit-scrollbar-thumb:hover,
+    body ::-webkit-scrollbar-thumb:hover {
+        background-color: #999
+    }
+
+    .read-section.sidebar-main {
+        width: 500px;
+    }
+
+    .sidebar-main {
+        position: fixed;
+        top: 30px;
+        bottom: 50px;
+        z-index: 100;
+    }
+
+    .read-section .sidebar-header {
+        border-top-right-radius: 4px;
+    }
+
+    .sidebar-header {
+        height: 40px;
+        line-height: 20px;
+        background: #333;
+    }
+
+    .sidebar-header-button {
+        display: inline-block;
+        line-height: 2.7;
+        padding: 0 1.6em;
+        color: #fff;
+        white-space: nowrap;
+        text-align: center;
+        border: 0;
+        border-radius: 5px;
+        vertical-align: middle;
+        background-color: inherit;
+        cursor: pointer;
+    }
+
+    .read-section .sidebar-content {
+        bottom: 0;
+        border-bottom-right-radius: 4px;
+    }
+
+    .sidebar-content {
+        overflow-x: hidden;
+        overflow-y: hidden;
+        position: absolute;
+        top: 40px;
+        right: 0;
+        left: 0;
+        background: #3c3c3c;
+    }
+
+    .mCustomScrollBox {
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+        max-width: 100%;
+        outline: 0;
+        direction: ltr;
+    }
+
+    .read-section .sidebar-content li {
+        position: relative;
+        padding: 5px 0;
+        color: white;
+    }
+
+    .read-section .sidebar-btn {
+        right: -40px;
+        border-radius: 0 8px 8px 0;
+    }
+
+    .sidebar-btn {
+        position: absolute;
+        top: 50%;
+        width: 40px;
+        height: 100px;
+        margin-top: -50px;
+        padding: 35px 0;
+        text-align: center;
+        font-size: 14px;
+        line-height: 16px;
+        color: #b0b0b0;
+        background: #3c3c3c;
+        cursor: pointer;
+    }
+
+    /* .sidebar-header-l {
+    position: absolute;
+    top: 0;
+    left: 10px;
+    font-size: 14px;
+    color: #fff;
+    font-style: normal;
+    cursor: pointer;
+    padding: 2px;
+    border: 1px solid rgb(95, 95, 95);
+    background-color: rgb(95, 95, 95);
+}
+
+.sidebar-header-r {
+    position: absolute;
+    top: 0;
+    right: 10px;
+    font-size: 14px;
+    color: #fff;
+    font-style: normal;
+    cursor: pointer;
+    padding: 2px;
+    border: 1px solid rgb(95, 95, 95);
+    background-color: rgb(95, 95, 95);
+} */
+</style>
