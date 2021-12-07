@@ -17,7 +17,7 @@ export const routes: Route[] = [
     },
     {
         View: _8hko,
-        path: ['https://www.shenzhenyezi.com', 'https://8hko.com', 'https://palaxe.com'],
+        path: ['https://www.shenzhenyezi.com', 'https://8hko.com', 'https://palaxe.com','https://www.92saobao.com','https://www.wooden-specialties.com','https://www.nrvjeepclub.com'],
         enabled: true
     },
     {

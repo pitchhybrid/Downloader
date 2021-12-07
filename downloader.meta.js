@@ -10,6 +10,9 @@
 // @include      https://8hko.com/*
 // @include      https://palaxe.com/*
 // @include      https://www.xinmeitulu.com/photo/*
+// @include      https://www.92saobao.com/post/*
+// @include      https://www.wooden-specialties.com/post/*
+// @include      https://www.nrvjeepclub.com/post/*
 // @connect      zazhitaotu.cc
 // @connect      tu.acgbox.org
 // @connect      img.acgbox.org
