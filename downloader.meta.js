@@ -13,6 +13,7 @@
 // @include      https://www.92saobao.com/post/*
 // @include      https://www.wooden-specialties.com/post/*
 // @include      https://www.nrvjeepclub.com/post/*
+// @include      https://dongtimimi.com/*.html
 // @connect      zazhitaotu.cc
 // @connect      tu.acgbox.org
 // @connect      img.acgbox.org
@@ -21,6 +22,7 @@
 // @connect      8hko.com
 // @connect      www.prshepic.com
 // @connect      cloud.xinmeitulu.com
+// @connect      dongtimimi.com
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_xmlhttpRequest
