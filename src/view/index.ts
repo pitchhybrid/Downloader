@@ -1,6 +1,7 @@
 import { Zazhitaotou } from './view.zazhitaotu';
 import { Xinmeitulu } from './view.xinmeitulu';
 import { Dongtimini } from './view.dongtimimi';
+import { Quxiezhen } from './view.quxiezhen';
 import { _8hko } from './view.8hko';
 import { Abstract } from './view'
 
@@ -29,6 +30,11 @@ export const routes: Route[] = [
     {
         View: Dongtimini,
         path: ['https://dongtimimi.com'],
+        enabled: true
+    },
+    {
+        View: Quxiezhen,
+        path: ['https://www.quxiezhen.com'],
         enabled: true
     }
 ];
