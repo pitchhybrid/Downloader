@@ -15,8 +15,10 @@
 // @include      https://www.nrvjeepclub.com/post/*
 // @include      https://dongtimimi.com/*.html
 // @include      https://www.quxiezhen.com/*
+// @include      https://asiansister.com/view_*
 // @connect      zazhitaotu.cc
 // @connect      img.qulingyu.cc
+// @connect      asiansister.com
 // @connect      tu.acgbox.org
 // @connect      img.acgbox.org
 // @connect      www.shenzhenyezi.com
