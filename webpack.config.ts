@@ -1,9 +1,9 @@
-const path = require('path');
+import { resolve } from 'path';
 import {Configuration} from 'webpack';
  
 const config: Configuration = {
   mode: "production",
-  entry: path.resolve(__dirname, './src/index.ts'),
+  entry: resolve(__dirname, './src/index.ts'),
   module: {
     rules: [
       {
@@ -11,19 +11,14 @@ const config: Configuration = {
         use: 'ts-loader',
         exclude: /node_modules/,
       },
-      {
-        test: /\.html$/i,
-        use: "raw-loader",
-        exclude: /node_modules/,
-      }
     ],
   },
   resolve: {
-    extensions: ['.ts', '.js','.html','.json'],
+    extensions: ['.ts', '.js','.json'],
   },
   output: {
     filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist'),
+    path: resolve(__dirname, 'dist'),
   },
 };
 

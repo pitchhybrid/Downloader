@@ -11,16 +11,11 @@
   "dependencies": {
     "file-saver": "^2.0.5",
     "jquery": "^3.6.0",
-    "jszip": "^3.7.1",
-    "raw-loader": "^4.0.2",
-    "superagent": "^6.1.0",
-    "superagent-no-cache": "^0.1.1"
+    "jszip": "^3.7.1"
   },
   "devDependencies": {
     "@types/file-saver": "^2.0.4",
     "@types/node": "^16.11.10",
-    "@types/superagent": "^4.1.13",
-    "@types/superagent-no-cache": "^0.1.2",
     "@types/tampermonkey": "^4.0.5",
     "@types/webpack": "^5.28.0",
     "html-loader": "^3.0.1",
