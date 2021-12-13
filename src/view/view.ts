@@ -1,13 +1,13 @@
-import * as JSZip from 'jszip';
+
 import { Image } from './../model/image';
 import { saveAs } from 'file-saver';
+import JSZip = require('jszip');
 
 export abstract class Abstract {
 
     private div: HTMLDivElement = document.createElement('div');
     private sidebar: HTMLElement;
-    private buttonZIPEl: HTMLElement;
-    private buttonCBZEl: HTMLElement;
+    private mainBTNEl: HTMLElement;
     private title: HTMLElement;
     public list: HTMLElement;
 
@@ -15,14 +15,14 @@ export abstract class Abstract {
 
     public images: Image[] = [];
     public zip: JSZip = new JSZip();
+    public folder:JSZip;
 
     constructor() {
         this.div.innerHTML = require('./template/index.html').default;
         document.body.appendChild(this.div);
         this.sidebar = document.getElementById('templateSideBar');
         this.list = document.getElementById('sidebarList');
-        this.buttonCBZEl = document.getElementById('sidebarCBZ');
-        this.buttonZIPEl = document.getElementById('sidebarZIP');
+        this.mainBTNEl = document.getElementById('mainBTN');
         this.title = document.getElementById('headerDownloader');
 
         document.getElementById('sidebarBTN').onclick = () => {
@@ -39,6 +39,7 @@ export abstract class Abstract {
     public addList(image: Image, progress: Tampermonkey.ProgressResponseBase): void {
         var cell: HTMLElement = image.getCell() // li;
         cell.title = image.src;
+        cell.onclick = () => this.debug(image.index);
         cell.innerHTML = `<p>${image.name} - <small>(${((progress.loaded / progress.totalSize) * 100).toFixed(2)}%)</small></p>
                        
                             <p class="progress-k" style="width: ${((progress.loaded / progress.totalSize) * 100).toFixed(0)}%"></p>
@@ -48,12 +49,12 @@ export abstract class Abstract {
         (this.list.parentNode as HTMLElement).scrollTop = (this.list.parentNode as HTMLElement).scrollHeight;
     }
 
-    public buttonZIP(f: (e: PointerEvent) => void): void {
-        this.buttonZIPEl.onclick = f;
+    public debug(index:number){
+        console.log({image:this.images[index],li:this.list.childNodes.item(index)})
     }
 
-    public buttonCBZ(f: (e: PointerEvent) => void): void {
-        this.buttonCBZEl.onclick = f;
+    public button(f: (e: PointerEvent) => void): void {
+        this.mainBTNEl.onclick = f;
     }
 
     public abstract name(): string;
@@ -61,28 +62,31 @@ export abstract class Abstract {
     public abstract queryLinksImages(): [Image] | void;
 
     private clear(): void {
-        while (this.list.firstChild) {
-            this.list.removeChild(this.list.firstChild);
+        var done:boolean = true;
+        if(this.images){
+            for(const image of this.images){
+                if(image.done == false){
+                    done = false;
+                }
+            }
+        }
+        if(done){
+            while (this.list.firstChild) {
+                this.list.removeChild(this.list.firstChild);
+            }
         }
     }
 
     public render(): void {
         var vm = this;
         var name: string = this.name();
-        this.buttonZIP(function (e: PointerEvent) {
+        this.folder = this.zip.folder(name);
+        this.queryLinksImages();
+        this.button(function (e: PointerEvent) {
             vm.clear();
-            vm.processar(name).then(stream => {
-                saveAs(stream, name + '.zip');
-                // (e.target as HTMLButtonElement).disabled = false;
-            }).catch(err => {
-                console.error(err);
-                window.alert(err.message);
-            });
-        });
-        this.buttonCBZ(function (e: PointerEvent) {
-            vm.clear();
-            vm.processar(name).then(stream => {
-                saveAs(stream, name + '.cbz');
+            vm.processar(vm.images).then(stream => {
+                var toggle:boolean = (document.getElementById('btnZipCbz') as HTMLInputElement).checked ;
+                saveAs(stream, name + (toggle ? '.cbz':'.zip'));
                 // (e.target as HTMLButtonElement).disabled = false;
             }).catch(err => {
                 console.error(err);
@@ -91,16 +95,16 @@ export abstract class Abstract {
         });
     }
 
-    public async processar(name: string): Promise<Blob> {
+    public async processar(images:Image[]): Promise<Blob> {
         try {
-            var folder = this.zip.folder(name);
-            for (const image of this.images) {
+            for (const image of images) {
                 let b = await this.download<Blob>(image.src, {
                     event: event => {
                         this.addList(image, event);
                     }
                 });
-                folder.file(image.file(b), b);
+                this.folder.file(image.file(b), b);
+                image.done = true;
             }
             return await this.zip.generateAsync({ type: 'blob', comment: window.location.href });
         } catch (e) {
@@ -114,7 +118,7 @@ export abstract class Abstract {
                 method: 'GET',
                 url,
                 responseType,
-                timeout: 10000,
+                timeout: 120000,
                 onprogress: event,
                 onload: (xml: Tampermonkey.ResponseBase) => {
                     if (xml.status == 200)

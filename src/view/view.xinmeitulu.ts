@@ -8,8 +8,7 @@ export class Xinmeitulu extends Abstract{
     }
 
     public name(): string {
-        var a:HTMLElement = document.querySelector('.container>h1.h3');
-        return a.innerText;
+        return document.querySelector<HTMLElement>('.container>h1.h3').innerText;
     }
     public queryLinksImages(): void | [Image] {
         var name:string = this.name();

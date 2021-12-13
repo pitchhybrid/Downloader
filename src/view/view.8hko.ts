@@ -8,7 +8,7 @@ export class _8hko extends Abstract{
     }
 
     public name(): string {
-        var a:HTMLElement = document.querySelector('.f-22.mb5') as HTMLElement;
+        var a:HTMLElement = document.querySelector<HTMLElement>('.f-22.mb5');
         if(a == null){
             a  = document.querySelector('title');
         }

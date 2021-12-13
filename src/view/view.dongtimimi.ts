@@ -8,8 +8,7 @@ export class Dongtimini extends Abstract{
     }
 
     public name(): string {
-        var a:HTMLElement = document.querySelector<HTMLElement>('header.entry-header>h1');
-        return a.innerText;
+        return document.querySelector<HTMLElement>('header.entry-header>h1').innerText;
     }
     public queryLinksImages(): void | [Image] {
         var name:string = this.name();

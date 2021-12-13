@@ -14,8 +14,7 @@ export class Zazhitaotou extends Abstract {
     }
 
     public name(): string {
-        var t: HTMLElement = document.querySelector('span.post-info-text');
-        return t.innerText;
+        return document.querySelector<HTMLElement>('span.post-info-text').innerText;
     }
 
 }

@@ -3,8 +3,9 @@ import { Xinmeitulu } from './view.xinmeitulu';
 import { Dongtimini } from './view.dongtimimi';
 import { Quxiezhen } from './view.quxiezhen';
 import { Asiansister } from './view.asiansister';
+import { Cyberdrop } from './view.cyberdrop';
 import { _8hko } from './view.8hko';
-import { Abstract } from './view'
+import { Abstract } from './view';
 
 export type Route = {
     View: (new () => Abstract);
@@ -41,6 +42,11 @@ export const routes: Route[] = [
     {
         View: Asiansister,
         path: ['https://asiansister.com'],
+        enabled: true
+    },
+    {
+        View: Cyberdrop,
+        path: ['https://cyberdrop.me','https://bunkr.is'],
         enabled: true
     },
     

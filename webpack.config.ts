@@ -2,13 +2,22 @@ import { resolve } from 'path';
 import {Configuration} from 'webpack';
  
 const config: Configuration = {
-  mode: "production",
+  mode: "development",
   entry: resolve(__dirname, './src/index.ts'),
+  stats:{
+    warnings:false,
+    cached:false
+  },
   module: {
     rules: [
       {
         test: /\.ts?$/,
         use: 'ts-loader',
+        exclude: /node_modules/,
+      },
+      {
+        test: /\.html?$/,
+        use: 'html-loader',
         exclude: /node_modules/,
       },
     ],

@@ -16,6 +16,10 @@
 // @include      https://dongtimimi.com/*.html
 // @include      https://www.quxiezhen.com/*
 // @include      https://asiansister.com/view_*
+// @include      https://cyberdrop.me/a/*
+// @include      https://bunkr.is/a/*
+// @connect      cyberdrop.me
+// @connect      cyberdrop.to
 // @connect      zazhitaotu.cc
 // @connect      img.qulingyu.cc
 // @connect      asiansister.com

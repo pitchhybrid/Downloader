@@ -9,9 +9,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "browser-mime": "^1.0.1",
     "file-saver": "^2.0.5",
     "jquery": "^3.6.0",
-    "jszip": "^3.7.1"
+    "jszip": "^3.7.1",
+    "path-browserify": "^1.0.1"
   },
   "devDependencies": {
     "@types/file-saver": "^2.0.4",

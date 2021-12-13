@@ -1,8 +1,14 @@
 <div class="read-section sidebar-main" style="left: -500px;" id="templateSideBar">
     <div class="sidebar-header">
-        <button class="sidebar-header-button" style="float: left; margin: 0 20px;" id="sidebarZIP">ZIP</button>
-        <p id="headerDownloader" style="text-align: center;color: #fff;position: absolute; right: 45%; top: 4px;"></p>
-        <button class="sidebar-header-button" style="float: right;margin: 0 20px;" id="sidebarCBZ">CBZ</button>
+        <label class="switch sidebar-header-button" style="float: left; margin: 0 20px;">
+            <input type="checkbox" id="btnZipCbz" checked="true">
+            <div class="slider round">
+                <span class="on">CBZ</span>
+                <span class="off">ZIP</span>
+            </div>
+        </label>
+        <p id="headerDownloader" style="text-align: center;color: #fff;position: absolute; right: 45%; top: 4px;padding: 5px;"></p>
+        <button class="sidebar-header-button" style="float: right;margin: 0 20px;" id="mainBTN">下載</button>
     </div>
     <div class="sidebar-content">
         <div class="mCustomScrollBox"
@@ -16,6 +22,90 @@
 </div>
 
 <style>
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 90px;
+        height: 34px;
+    }
+
+    .switch input {
+        display: none;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ca2222;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+    input:checked+.slider {
+        background-color: #2ab934;
+    }
+
+    input:focus+.slider {
+        box-shadow: 0 0 1px #2196F3;
+    }
+
+    input:checked+.slider:before {
+        -webkit-transform: translateX(55px);
+        -ms-transform: translateX(55px);
+        transform: translateX(55px);
+    }
+
+    /*------ ADDED CSS ---------*/
+    .on {
+        display: none;
+    }
+
+    .on,
+    .off {
+        color: white;
+        position: absolute;
+        transform: translate(-50%, -50%);
+        top: 50%;
+        left: 50%;
+        font-size: 10px;
+        font-family: Verdana, sans-serif;
+    }
+
+    input:checked+.slider .on {
+        display: block;
+    }
+
+    input:checked+.slider .off {
+        display: none;
+    }
+
+    /*--------- END --------*/
+
+    /* Rounded sliders */
+    .slider.round {
+        border-radius: 34px;
+    }
+
+    .slider.round:before {
+        border-radius: 50%;
+    }
+
     .progress-k {
         padding: 3px;
         width: 100%;
@@ -65,8 +155,10 @@
     }
 
     .sidebar-header {
-        height: 40px;
-        line-height: 20px;
+        position: absolute;
+        width: 100%;
+        padding: 5px;
+        z-index: 10;
         background: #333;
     }
 
@@ -132,7 +224,8 @@
         background: #3c3c3c;
         cursor: pointer;
     }
-/* 
+
+    /* 
 .sidebar-header-l {
     position: absolute;
     top: 0;
