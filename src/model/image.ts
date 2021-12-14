@@ -28,17 +28,6 @@ export class Image {
     public file(b: Blob | string | ArrayBuffer): string {
         if (b instanceof Blob) {
             return this.name + '.' + mime.extension(b.type);
-            // if (b.type == 'image' || 'image/jpeg' || 'image/jpg') {
-            // }
-            // if (b.type == 'image/png') {
-            //     return this.name + '.png';
-            // }
-            // if (b.type == 'image/gif') {
-            //     return this.name + '.gif';
-            // }
-            // if (b.type == 'video' || 'video/mp4') {
-            //     return this.name + '.mp4';
-            // }
         }
         return 'none.jpg';
     }

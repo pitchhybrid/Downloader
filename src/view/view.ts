@@ -24,7 +24,7 @@ export abstract class Abstract {
         this.list = document.getElementById('sidebarList');
         this.mainBTNEl = document.getElementById('mainBTN');
         this.title = document.getElementById('headerDownloader');
-
+        document.getElementById('zipProgress').style.padding = '0';
         document.getElementById('sidebarBTN').onclick = () => {
             if (this.state) {
                 this.sidebar.style.left = '-500px';
@@ -49,6 +49,31 @@ export abstract class Abstract {
         (this.list.parentNode as HTMLElement).scrollTop = (this.list.parentNode as HTMLElement).scrollHeight;
     }
 
+    private getLi(title:string):HTMLLIElement{
+       var itens:HTMLLIElement[] = Array.from(document.querySelectorAll<HTMLLIElement>('#zipList>li'));
+       for(const item of itens){
+            if(item.title === title){
+                return item;
+            }
+       }
+       return document.createElement('li');
+    }
+
+    public addZipProgress(progress:Metadata){
+        if(progress.currentFile){
+            var li:HTMLLIElement = this.getLi(progress.currentFile);
+            li.title = progress.currentFile;
+            var titles:string[] = progress.currentFile.split('/');
+            li.innerHTML = `<p>${titles[1] || titles[0]}</p>`;
+            document.getElementById('zipList').appendChild(li);
+            var style:CSSStyleDeclaration = document.getElementById('zipProgress').style;
+            style.padding = '3px';
+            style.width = progress.percent + '%';
+            document.getElementById('zipPercent').innerHTML = `<small>${document.getElementById('zipList').childElementCount - 1} of ${this.images.length} ${progress.percent.toFixed(2)}%</small>`;
+            (this.list.parentNode as HTMLElement).scrollTop = (this.list.parentNode as HTMLElement).scrollHeight;
+        }
+    }
+
     public debug(index:number){
         console.log({image:this.images[index],li:this.list.childNodes.item(index)})
     }
@@ -67,6 +92,7 @@ export abstract class Abstract {
             for(const image of this.images){
                 if(image.done == false){
                     done = false;
+                    break;
                 }
             }
         }
@@ -82,33 +108,32 @@ export abstract class Abstract {
         var name: string = this.name();
         this.folder = this.zip.folder(name);
         this.queryLinksImages();
-        this.button(function (e: PointerEvent) {
+        this.button(async function (e: PointerEvent) {
             vm.clear();
-            vm.processar(vm.images).then(stream => {
-                var toggle:boolean = (document.getElementById('btnZipCbz') as HTMLInputElement).checked ;
-                saveAs(stream, name + (toggle ? '.cbz':'.zip'));
-                // (e.target as HTMLButtonElement).disabled = false;
-            }).catch(err => {
-                console.error(err);
-                window.alert(err.message);
+            const stream:Blob = await vm.processar(vm.images,( progress:Metadata ): void => {
+                vm.addZipProgress(progress);
             });
+            var toggle:boolean = (document.getElementById('btnZipCbz') as HTMLInputElement).checked;
+            saveAs(stream, name + (toggle ? '.cbz':'.zip'));
         });
     }
 
-    public async processar(images:Image[]): Promise<Blob> {
+    public async processar(images:Image[],progress?:(progress:Metadata) => void): Promise<Blob> {
         try {
             for (const image of images) {
-                let b = await this.download<Blob>(image.src, {
-                    event: event => {
-                        this.addList(image, event);
-                    }
-                });
-                this.folder.file(image.file(b), b);
-                image.done = true;
+                if(image.done == false){
+                    const b:Blob = await this.download<Blob>(image.src, {
+                        event: event => {
+                            this.addList(image, event);
+                        }
+                    });
+                    this.folder.file(image.file(b), b);
+                    image.done = true;
+                }
             }
-            return await this.zip.generateAsync({ type: 'blob', comment: window.location.href });
+            return this.zip.generateAsync({ type: 'blob', comment: window.location.href },progress);
         } catch (e) {
-            throw new Error('error!!!' + e);
+            throw e;
         }
     }
 
@@ -138,4 +163,9 @@ type Download = {
     responseType?: 'blob' | 'json' | 'arraybuffer';
     event?: (event: Tampermonkey.ProgressResponseBase) => void;
     prop?: 'response' | 'responseText' | 'responseHeaders' | 'responseXML';
+}
+
+type Metadata = { 
+    percent: number; 
+    currentFile: string; 
 }
