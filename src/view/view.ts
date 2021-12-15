@@ -2,6 +2,7 @@
 import { Image } from './../model/image';
 import { saveAs } from 'file-saver';
 import JSZip = require('jszip');
+import {sizeOf} from './../utils/utils';
 
 export abstract class Abstract {
 
@@ -37,13 +38,14 @@ export abstract class Abstract {
     }
 
     public addList(image: Image, progress: Tampermonkey.ProgressResponseBase): void {
-        var cell: HTMLElement = image.getCell() // li;
+        const cell: HTMLElement = image.getCell() // li;
         cell.title = image.src;
         cell.onclick = () => this.debug(image.index);
-        cell.innerHTML = `<p>${image.name} - <small>(${((progress.loaded / progress.totalSize) * 100).toFixed(2)}%)</small></p>
-                       
-                            <p class="progress-k" style="width: ${((progress.loaded / progress.totalSize) * 100).toFixed(0)}%"></p>
-                         <p><small>${progress.loaded} bytes of ${progress.totalSize} bytes</small></p>`;
+        const percent:string = `${((progress.loaded / progress.totalSize) * 100).toFixed(2)}%`;
+        cell.innerHTML = `
+            <p style="text-align: left;">${image.name}</p>           
+            <p class="progress-k" style="width: ${percent}"></p>
+            <p style="text-align: center;"><small>${sizeOf(progress.loaded)} of ${sizeOf(progress.totalSize)} (${percent})</small></p>`;
         this.list.appendChild(cell);
         this.title.innerHTML = `<small>${this.list.childElementCount} of ${this.images.length}</small>`;
         (this.list.parentNode as HTMLElement).scrollTop = (this.list.parentNode as HTMLElement).scrollHeight;
@@ -69,13 +71,13 @@ export abstract class Abstract {
             var style:CSSStyleDeclaration = document.getElementById('zipProgress').style;
             style.padding = '3px';
             style.width = progress.percent + '%';
-            document.getElementById('zipPercent').innerHTML = `<small>${document.getElementById('zipList').childElementCount - 1} of ${this.images.length} ${progress.percent.toFixed(2)}%</small>`;
+            document.getElementById('zipPercent').innerHTML = `<small>${document.getElementById('zipList').childElementCount - 1} of ${this.images.length} (${progress.percent.toFixed(2)}%)</small>`;
             (this.list.parentNode as HTMLElement).scrollTop = (this.list.parentNode as HTMLElement).scrollHeight;
         }
     }
 
     public debug(index:number){
-        console.log({image:this.images[index],li:this.list.childNodes.item(index)})
+        console.log(this.images[index]);
     }
 
     public button(f: (e: PointerEvent) => void): void {
@@ -109,12 +111,16 @@ export abstract class Abstract {
         this.folder = this.zip.folder(name);
         this.queryLinksImages();
         this.button(async function (e: PointerEvent) {
-            vm.clear();
-            const stream:Blob = await vm.processar(vm.images,( progress:Metadata ): void => {
-                vm.addZipProgress(progress);
-            });
-            var toggle:boolean = (document.getElementById('btnZipCbz') as HTMLInputElement).checked;
-            saveAs(stream, name + (toggle ? '.cbz':'.zip'));
+            try {
+                vm.clear();
+                const stream:Blob = await vm.processar(vm.images,( progress:Metadata ): void => {
+                    vm.addZipProgress(progress);
+                });
+                var toggle:boolean = (document.getElementById('btnZipCbz') as HTMLInputElement).checked;
+                saveAs(stream, name + (toggle ? '.cbz':'.zip'));
+            } catch (error) {
+                console.error(error);
+            }
         });
     }
 
@@ -123,7 +129,7 @@ export abstract class Abstract {
             for (const image of images) {
                 if(image.done == false){
                     const b:Blob = await this.download<Blob>(image.src, {
-                        event: event => {
+                        onprogress: (event: Tampermonkey.ProgressResponseBase) => {
                             this.addList(image, event);
                         }
                     });
@@ -137,31 +143,39 @@ export abstract class Abstract {
         }
     }
 
-    public download<T extends Blob | string | ArrayBuffer>(url: string, { event, prop = 'response', responseType = 'blob' }: Download): Promise<T> {
+    public download<T extends Blob | string | ArrayBuffer>(url: string, 
+        { onprogress,ontimeout,onerror,
+            method = 'GET',
+            prop = 'response', 
+            responseType = 'blob',
+            timeout = 120000
+        }: Download): Promise<T> {
+        
         return new Promise((resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void): void => {
-            GM_xmlhttpRequest({
-                method: 'GET',
-                url,
-                responseType,
-                timeout: 120000,
-                onprogress: event,
-                onload: (xml: Tampermonkey.ResponseBase) => {
-                    if (xml.status == 200)
-                        resolve(xml[prop]);
-                    else
-                        reject(xml.statusText);
-                },
-                ontimeout: () => {
-                    reject('timeout');
-                }
-            });
+            try {
+                GM_xmlhttpRequest({ method, url, responseType, timeout,
+                    onprogress, ontimeout, onerror,
+                    onload: (xml: Tampermonkey.ResponseBase) => {
+                        if (xml.status == 200)
+                            resolve(xml[prop]);
+                        else
+                            reject(xml.statusText);
+                    },
+                });
+            } catch (error) {
+                throw reject(error);
+            }
         });
     }
 }
 
 type Download = {
+    method?: 'GET' | 'POST';
     responseType?: 'blob' | 'json' | 'arraybuffer';
-    event?: (event: Tampermonkey.ProgressResponseBase) => void;
+    onprogress?: (event: Tampermonkey.ProgressResponseBase) => void;
+    ontimeout?: () => void;
+    onerror?: (error:Tampermonkey.ErrorResponse) => void;
+    timeout?:number;
     prop?: 'response' | 'responseText' | 'responseHeaders' | 'responseXML';
 }
 
