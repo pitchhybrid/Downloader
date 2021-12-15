@@ -5,18 +5,18 @@ import JSZip = require('jszip');
 import {sizeOf} from './../utils/utils';
 
 export abstract class Abstract {
-
+    private errors:any[] = [];
     private div: HTMLDivElement = document.createElement('div');
     private sidebar: HTMLElement;
     private mainBTNEl: HTMLElement;
     private title: HTMLElement;
     public list: HTMLElement;
 
-    private state: boolean = false;
-
     public images: Image[] = [];
     public zip: JSZip = new JSZip();
     public folder:JSZip;
+
+    public progress:number[] = [];
 
     constructor() {
         this.div.innerHTML = require('./template/index.html').default;
@@ -27,12 +27,10 @@ export abstract class Abstract {
         this.title = document.getElementById('headerDownloader');
         document.getElementById('zipProgress').style.padding = '0';
         document.getElementById('sidebarBTN').onclick = () => {
-            if (this.state) {
-                this.sidebar.style.left = '-500px';
-                this.state = false;
-            } else {
+            if(this.sidebar.style.left == '-500px'){
                 this.sidebar.style.left = '0.5px';
-                this.state = true;
+            }else{
+                this.sidebar.style.left = '-500px';
             }
         };
     }
@@ -41,14 +39,23 @@ export abstract class Abstract {
         const cell: HTMLElement = image.getCell() // li;
         cell.title = image.src;
         cell.onclick = () => this.debug(image.index);
-        const percent:string = `${((progress.loaded / progress.totalSize) * 100).toFixed(2)}%`;
+        var { percent,speed,downloaded } = this.speed(progress);
         cell.innerHTML = `
             <p style="text-align: left;">${image.name}</p>           
             <p class="progress-k" style="width: ${percent}"></p>
-            <p style="text-align: center;"><small>${sizeOf(progress.loaded)} of ${sizeOf(progress.totalSize)} (${percent})</small></p>`;
+            <p style="text-align: center;"><small>${downloaded} (${percent}) ${speed}</small></p>`;
         this.list.appendChild(cell);
-        this.title.innerHTML = `<small>${this.list.childElementCount} of ${this.images.length}</small>`;
-        (this.list.parentNode as HTMLElement).scrollTop = (this.list.parentNode as HTMLElement).scrollHeight;
+    }
+
+    private speed(progress: Tampermonkey.ProgressResponseBase):Info{
+        var data:Info = {
+            percent: `${((progress.loaded / progress.totalSize) * 100).toFixed(2)}%`,
+            downloaded: `${sizeOf(progress.loaded)} of ${sizeOf(progress.totalSize)}`
+        };
+        if(this.progress.length > 2){
+            data.speed == undefined ? '':`${sizeOf(progress.loaded - this.progress[this.progress.length-2])}/s`
+        }
+        return data;
     }
 
     private getLi(title:string):HTMLLIElement{
@@ -119,7 +126,8 @@ export abstract class Abstract {
                 var toggle:boolean = (document.getElementById('btnZipCbz') as HTMLInputElement).checked;
                 saveAs(stream, name + (toggle ? '.cbz':'.zip'));
             } catch (error) {
-                console.error(error);
+                this.errors.push(error);
+                console.error(this.errors);
             }
         });
     }
@@ -130,15 +138,23 @@ export abstract class Abstract {
                 if(image.done == false){
                     const b:Blob = await this.download<Blob>(image.src, {
                         onprogress: (event: Tampermonkey.ProgressResponseBase) => {
+                            this.progress.push(event.loaded);
                             this.addList(image, event);
+                            this.title.innerHTML = `<small>${this.list.childElementCount} of ${this.images.length}</small>`;
+                            const parent:HTMLElement = this.list.parentNode as HTMLElement;
+                            parent.scrollTop = parent.scrollHeight;
+                        },
+                        onerror:(error:Tampermonkey.ErrorResponse) => {
+                            console.log(error)
                         }
                     });
                     this.folder.file(image.file(b), b);
                     image.done = true;
                 }
             }
-            return this.zip.generateAsync({ type: 'blob', comment: window.location.href },progress);
+            return this.zip.generateAsync({ type: 'blob', comment: window.location.href }, progress);
         } catch (e) {
+            this.errors.push(e);
             throw e;
         }
     }
@@ -163,7 +179,7 @@ export abstract class Abstract {
                     },
                 });
             } catch (error) {
-                throw reject(error);
+                this.errors.push(error);
             }
         });
     }
@@ -182,4 +198,10 @@ type Download = {
 type Metadata = { 
     percent: number; 
     currentFile: string; 
+}
+
+type Info = {
+    percent:string; 
+    downloaded:string;
+    speed?:string;
 }
