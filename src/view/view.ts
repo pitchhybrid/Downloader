@@ -39,7 +39,7 @@ export abstract class Abstract {
         const cell: HTMLElement = image.getCell() // li;
         cell.title = image.src;
         cell.onclick = () => this.debug(image.index);
-        var { percent,speed,downloaded } = this.speed(progress);
+        var { percent,speed,downloaded } = this.info(progress);
         cell.innerHTML = `
             <p style="text-align: left;">${image.name}</p>           
             <p class="progress-k" style="width: ${percent}"></p>
@@ -47,13 +47,16 @@ export abstract class Abstract {
         this.list.appendChild(cell);
     }
 
-    private speed(progress: Tampermonkey.ProgressResponseBase):Info{
+    private info(progress: Tampermonkey.ProgressResponseBase):Info{
         var data:Info = {
             percent: `${((progress.loaded / progress.totalSize) * 100).toFixed(2)}%`,
-            downloaded: `${sizeOf(progress.loaded)} of ${sizeOf(progress.totalSize)}`
+            downloaded: `${sizeOf(progress.loaded)} of ${sizeOf(progress.totalSize)}`,
         };
+       
         if(this.progress.length > 2){
-            data.speed == undefined ? '':`${sizeOf(progress.loaded - this.progress[this.progress.length-2])}/s`
+            data.speed = `${sizeOf(progress.loaded - this.progress[this.progress.length-2])}/s`;
+        }else{
+            data.speed = `${sizeOf(progress.loaded)}/s`
         }
         return data;
     }
@@ -135,6 +138,7 @@ export abstract class Abstract {
     public async processar(images:Image[],progress?:(progress:Metadata) => void): Promise<Blob> {
         try {
             for (const image of images) {
+                this.progress = [];
                 if(image.done == false){
                     const b:Blob = await this.download<Blob>(image.src, {
                         onprogress: (event: Tampermonkey.ProgressResponseBase) => {
