@@ -1,9 +1,8 @@
-var mime = require('browser-mime');
-
 export class Image {
     public name: string;
     public src: string;
     public index:number;
+    public blob?:Blob;
     public done:boolean = false;
     private tr: HTMLElement;
 
@@ -23,12 +22,5 @@ export class Image {
             this.tr = document.createElement('li');
         }
         return this.tr;
-    }
-
-    public file(b: Blob | string | ArrayBuffer): string {
-        if (b instanceof Blob) {
-            return this.name + '.' + mime.extension(b.type);
-        }
-        return 'none.jpg';
     }
 }

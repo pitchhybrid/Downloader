@@ -2,10 +2,9 @@
 import { Image } from './../model/image';
 import { saveAs } from 'file-saver';
 import JSZip = require('jszip');
-import {sizeOf} from './../utils/utils';
+import {sizeOf,file} from './../utils/utils';
 
 export abstract class Abstract {
-    private errors:any[] = [];
     private div: HTMLDivElement = document.createElement('div');
     private sidebar: HTMLElement;
     private mainBTNEl: HTMLElement;
@@ -16,7 +15,7 @@ export abstract class Abstract {
     public zip: JSZip = new JSZip();
     public folder:JSZip;
 
-    public progress:number[] = [];
+    public speed:number[] = [];
 
     constructor() {
         this.div.innerHTML = require('./template/index.html').default;
@@ -43,18 +42,18 @@ export abstract class Abstract {
         cell.innerHTML = `
             <p style="text-align: left;">${image.name}</p>           
             <p class="progress-k" style="width: ${percent}"></p>
-            <p style="text-align: center;"><small>${downloaded} (${percent}) ${speed}</small></p>`;
+            <p><small style="float:left">${downloaded} (${percent})</small><small style="float:right">${speed}</small></p>`;
         this.list.appendChild(cell);
     }
 
-    private info(progress: Tampermonkey.ProgressResponseBase):Info{
-        var data:Info = {
+    private info(progress: Tampermonkey.ProgressResponseBase):Progress{
+        var data:Progress = {
             percent: `${((progress.loaded / progress.totalSize) * 100).toFixed(2)}%`,
             downloaded: `${sizeOf(progress.loaded)} of ${sizeOf(progress.totalSize)}`,
         };
        
-        if(this.progress.length > 2){
-            data.speed = `${sizeOf(progress.loaded - this.progress[this.progress.length-2])}/s`;
+        if(this.speed.length > 10){
+            data.speed = `${sizeOf(progress.loaded - this.speed[this.speed.length - 10])}/s`;
         }else{
             data.speed = `${sizeOf(progress.loaded)}/s`
         }
@@ -75,8 +74,8 @@ export abstract class Abstract {
         if(progress.currentFile){
             var li:HTMLLIElement = this.getLi(progress.currentFile);
             li.title = progress.currentFile;
-            var titles:string[] = progress.currentFile.split('/');
-            li.innerHTML = `<p>${titles[1] || titles[0]}</p>`;
+            const [_folder,_file] = progress.currentFile.split('/');
+            li.innerHTML = `<p>${_file || _folder}</p>`;
             document.getElementById('zipList').appendChild(li);
             var style:CSSStyleDeclaration = document.getElementById('zipProgress').style;
             style.padding = '3px';
@@ -129,62 +128,80 @@ export abstract class Abstract {
                 var toggle:boolean = (document.getElementById('btnZipCbz') as HTMLInputElement).checked;
                 saveAs(stream, name + (toggle ? '.cbz':'.zip'));
             } catch (error) {
-                this.errors.push(error);
-                console.error(this.errors);
+                console.log(error)
             }
         });
     }
 
     public async processar(images:Image[],progress?:(progress:Metadata) => void): Promise<Blob> {
-        try {
-            for (const image of images) {
-                this.progress = [];
-                if(image.done == false){
-                    const b:Blob = await this.download<Blob>(image.src, {
-                        onprogress: (event: Tampermonkey.ProgressResponseBase) => {
-                            this.progress.push(event.loaded);
-                            this.addList(image, event);
-                            this.title.innerHTML = `<small>${this.list.childElementCount} of ${this.images.length}</small>`;
-                            const parent:HTMLElement = this.list.parentNode as HTMLElement;
-                            parent.scrollTop = parent.scrollHeight;
-                        },
-                        onerror:(error:Tampermonkey.ErrorResponse) => {
-                            console.log(error)
-                        }
-                    });
-                    this.folder.file(image.file(b), b);
-                    image.done = true;
+        for (const image of images) {
+            do {
+                try {
+                    this.speed = [];
+                    if(image.done == false){
+                        image.blob = await this.download<Blob>(image.src, {
+                            onprogress: (event: Tampermonkey.ProgressResponseBase) => {
+                                this.speed.push(event.loaded);
+                                this.addList(image, event);
+                                this.title.innerHTML = `<small>${this.list.childElementCount} of ${this.images.length}</small>`;
+                                const parent:HTMLElement = this.list.parentNode as HTMLElement;
+                                parent.scrollTop = parent.scrollHeight;
+                            }
+                        });
+                        this.folder.file(file(image), image.blob);
+                        image.done = true;
+                    }
+                } catch (error) {
+                    console.error(error);
+                    image.done = false;
                 }
-            }
-            return this.zip.generateAsync({ type: 'blob', comment: window.location.href }, progress);
-        } catch (e) {
-            this.errors.push(e);
-            throw e;
+            } while (!image.done);
         }
+        return this.zip.generateAsync({ type: 'blob', comment: window.location.href }, progress);
+    }
+
+    public async processarPromiseAll(images:Image[]): Promise<Image[]> {
+        return Promise.all(images.map(async (image:Image,index:number) => {
+            image.blob = await this.download(image.src, {
+                onprogress: (event: Tampermonkey.ProgressResponseBase) => {
+                    this.speed.push(event.loaded);
+                    this.addList(image, event);
+                    this.title.innerHTML = `<small>${this.list.childElementCount} of ${this.images.length}</small>`;
+                    const parent:HTMLElement = this.list.parentNode as HTMLElement;
+                    parent.scrollTop = parent.scrollHeight;
+                }
+            });
+            image.done = true;
+            return image;
+        }));
     }
 
     public download<T extends Blob | string | ArrayBuffer>(url: string, 
-        { onprogress,ontimeout,onerror,
+        { onprogress,
             method = 'GET',
             prop = 'response', 
             responseType = 'blob',
-            timeout = 120000
+            timeout = 0
         }: Download): Promise<T> {
         
         return new Promise((resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void): void => {
-            try {
-                GM_xmlhttpRequest({ method, url, responseType, timeout,
-                    onprogress, ontimeout, onerror,
-                    onload: (xml: Tampermonkey.ResponseBase) => {
-                        if (xml.status == 200)
-                            resolve(xml[prop]);
-                        else
-                            reject(xml.statusText);
-                    },
-                });
-            } catch (error) {
-                this.errors.push(error);
-            }
+            GM_xmlhttpRequest<T>({ method, url, responseType, timeout,
+                onprogress,
+                onload: (xml: Tampermonkey.ResponseBase) => {
+                    if (xml.status == 200)
+                        resolve(xml[prop]);
+                    else
+                        reject(xml.statusText);
+                },
+                revalidate:true,
+                onerror:(error:Tampermonkey.ErrorResponse) =>{
+                    reject(error);
+                },
+                ontimeout:()=>{
+                    reject('timeout')
+                }
+            });
+            
         });
     }
 }
@@ -193,8 +210,6 @@ type Download = {
     method?: 'GET' | 'POST';
     responseType?: 'blob' | 'json' | 'arraybuffer';
     onprogress?: (event: Tampermonkey.ProgressResponseBase) => void;
-    ontimeout?: () => void;
-    onerror?: (error:Tampermonkey.ErrorResponse) => void;
     timeout?:number;
     prop?: 'response' | 'responseText' | 'responseHeaders' | 'responseXML';
 }
@@ -204,8 +219,9 @@ type Metadata = {
     currentFile: string; 
 }
 
-type Info = {
+type Progress = {
     percent:string; 
     downloaded:string;
     speed?:string;
+    interval?:NodeJS.Timer;
 }
