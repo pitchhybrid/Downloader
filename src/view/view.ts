@@ -47,7 +47,7 @@ export abstract class Abstract {
     }
 
     private info(progress: Tampermonkey.ProgressResponseBase):Progress{
-        var data:Progress = {
+        const data:Progress = {
             percent: `${((progress.loaded / progress.totalSize) * 100).toFixed(2)}%`,
             downloaded: `${sizeOf(progress.loaded)} of ${sizeOf(progress.totalSize)}`,
         };
@@ -115,15 +115,13 @@ export abstract class Abstract {
     }
 
     public render(): void {
-        var vm = this;
         var name: string = this.name();
         this.folder = this.zip.folder(name);
-        this.queryLinksImages();
-        this.button(async function (e: PointerEvent) {
+        this.button(async (e: PointerEvent) => {
             try {
-                vm.clear();
-                const stream:Blob = await vm.processar(vm.images,( progress:Metadata ): void => {
-                    vm.addZipProgress(progress);
+                this.clear();
+                const stream:Blob = await this.processar(this.images,( progress:Metadata ): void => {
+                    this.addZipProgress(progress);
                 });
                 var toggle:boolean = (document.getElementById('btnZipCbz') as HTMLInputElement).checked;
                 saveAs(stream, name + (toggle ? '.cbz':'.zip'));
@@ -158,22 +156,6 @@ export abstract class Abstract {
             } while (!image.done);
         }
         return this.zip.generateAsync({ type: 'blob', comment: window.location.href }, progress);
-    }
-
-    public async processarPromiseAll(images:Image[]): Promise<Image[]> {
-        return Promise.all(images.map(async (image:Image,index:number) => {
-            image.blob = await this.download(image.src, {
-                onprogress: (event: Tampermonkey.ProgressResponseBase) => {
-                    this.speed.push(event.loaded);
-                    this.addList(image, event);
-                    this.title.innerHTML = `<small>${this.list.childElementCount} of ${this.images.length}</small>`;
-                    const parent:HTMLElement = this.list.parentNode as HTMLElement;
-                    parent.scrollTop = parent.scrollHeight;
-                }
-            });
-            image.done = true;
-            return image;
-        }));
     }
 
     public download<T extends Blob | string | ArrayBuffer>(url: string, 
