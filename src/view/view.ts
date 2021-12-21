@@ -11,11 +11,14 @@ export abstract class Abstract {
     private title: HTMLElement;
     public list: HTMLElement;
 
-    public images: Image[] = [];
     public zip: JSZip = new JSZip();
     public folder:JSZip;
-
     public speed:number[] = [];
+    private zipEls:{[id:string]:HTMLLIElement} = {}; 
+    
+    public images:Image[] = [];
+    
+    public fails:Set<Image> = new Set<Image>();
 
     constructor() {
         this.div.innerHTML = require('./template/index.html').default;
@@ -34,15 +37,37 @@ export abstract class Abstract {
         };
     }
 
+    public abstract name(): string;
+
+    public abstract queryLinksImages(): [Image] | void;
+
+    public render(): void {
+        var name: string = this.name();
+        this.folder = this.zip.folder(name);
+        this.button(async (e: PointerEvent) => {
+            try {
+                this.clear();
+                const stream:Blob = await this.processar((progress:Metadata ): void => {
+                    this.addZipProgress(progress);
+                });
+                var toggle:boolean = (document.getElementById('btnZipCbz') as HTMLInputElement).checked;
+                saveAs(stream, name + (toggle ? '.cbz' : '.zip'));
+            } catch (error) {
+                console.log(error)
+            }
+        });
+    }
+
     public addList(image: Image, progress: Tampermonkey.ProgressResponseBase): void {
         const cell: HTMLElement = image.getCell() // li;
         cell.title = image.src;
-        cell.onclick = () => this.debug(image.index);
+        cell.style.color = 'white';
         var { percent,speed,downloaded } = this.info(progress);
         cell.innerHTML = `
-            <p style="text-align: left;">${image.name}</p>           
+            <p style="text-align: left; text-decoration: underline;"><a href="${image.src}" target="_blank">${image.name}</a></p>           
             <p class="progress-k" style="width: ${percent}"></p>
             <p><small style="float:left">${downloaded} (${percent})</small><small style="float:right">${speed}</small></p>`;
+        cell.getElementsByTagName('a')[0].onclick = () => this.debug(image.index);
         this.list.appendChild(cell);
     }
 
@@ -61,19 +86,19 @@ export abstract class Abstract {
     }
 
     private getLi(title:string):HTMLLIElement{
-       var itens:HTMLLIElement[] = Array.from(document.querySelectorAll<HTMLLIElement>('#zipList>li'));
-       for(const item of itens){
-            if(item.title === title){
-                return item;
-            }
-       }
-       return document.createElement('li');
+        var els = this.zipEls[title];
+        if(els){
+            return this.zipEls[title];
+        }else{
+            this.zipEls[title] = document.createElement('li');
+            return this.zipEls[title];
+        }
     }
 
     public addZipProgress(progress:Metadata){
         if(progress.currentFile){
             var li:HTMLLIElement = this.getLi(progress.currentFile);
-            li.title = progress.currentFile;
+            li.title = progress.percent.toString();
             const [_folder,_file] = progress.currentFile.split('/');
             li.innerHTML = `<p>${_file || _folder}</p>`;
             document.getElementById('zipList').appendChild(li);
@@ -93,10 +118,6 @@ export abstract class Abstract {
         this.mainBTNEl.onclick = f;
     }
 
-    public abstract name(): string;
-
-    public abstract queryLinksImages(): [Image] | void;
-
     private clear(): void {
         var done:boolean = true;
         if(this.images){
@@ -114,46 +135,35 @@ export abstract class Abstract {
         }
     }
 
-    public render(): void {
-        var name: string = this.name();
-        this.folder = this.zip.folder(name);
-        this.button(async (e: PointerEvent) => {
-            try {
-                this.clear();
-                const stream:Blob = await this.processar(this.images,( progress:Metadata ): void => {
-                    this.addZipProgress(progress);
-                });
-                var toggle:boolean = (document.getElementById('btnZipCbz') as HTMLInputElement).checked;
-                saveAs(stream, name + (toggle ? '.cbz':'.zip'));
-            } catch (error) {
-                console.log(error)
-            }
-        });
-    }
-
-    public async processar(images:Image[],progress?:(progress:Metadata) => void): Promise<Blob> {
-        for (const image of images) {
-            do {
+    public async * [Symbol.asyncIterator](): AsyncGenerator<Image, void, unknown>{
+        var index = 0;
+        while( this.images[index] != undefined ) {
+            const image:Image = this.images[index];
+            do{
+                this.speed = [];
                 try {
-                    this.speed = [];
-                    if(image.done == false){
-                        image.blob = await this.download<Blob>(image.src, {
-                            onprogress: (event: Tampermonkey.ProgressResponseBase) => {
-                                this.speed.push(event.loaded);
-                                this.addList(image, event);
-                                this.title.innerHTML = `<small>${this.list.childElementCount} of ${this.images.length}</small>`;
-                                const parent:HTMLElement = this.list.parentNode as HTMLElement;
-                                parent.scrollTop = parent.scrollHeight;
-                            }
-                        });
-                        this.folder.file(file(image), image.blob);
-                        image.done = true;
-                    }
+                    image.blob = await this.download<Blob>(image.src, {
+                        onprogress: (event: Tampermonkey.ProgressResponseBase) => {
+                            this.speed.push(event.loaded);
+                            this.addList(image, event);
+                            this.title.innerHTML = `<small>${this.list.childElementCount} of ${this.images.length}</small>`;
+                            const parent:HTMLElement = this.list.parentNode as HTMLElement;
+                            parent.scrollTop = parent.scrollHeight;
+                        }
+                    });
+                    index++;
+                    image.done = true;
+                    yield image
                 } catch (error) {
-                    console.error(error);
                     image.done = false;
                 }
-            } while (!image.done);
+            }while(!image.done);
+        }
+    }
+
+    public async processar(progress?:(progress:Metadata) => void): Promise<Blob>{
+        for await (const image of this){
+            this.folder.file(file(image), image.blob);
         }
         return this.zip.generateAsync({ type: 'blob', comment: window.location.href }, progress);
     }
@@ -166,7 +176,7 @@ export abstract class Abstract {
             timeout = 0
         }: Download): Promise<T> {
         
-        return new Promise((resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void): void => {
+        return new Promise((resolve: (value: T | PromiseLike<T>) => void, reject: (reason?:any ) => void): void => {
             GM_xmlhttpRequest<T>({ method, url, responseType, timeout,
                 onprogress,
                 onload: (xml: Tampermonkey.ResponseBase) => {
@@ -194,7 +204,7 @@ type Download = {
     onprogress?: (event: Tampermonkey.ProgressResponseBase) => void;
     timeout?:number;
     prop?: 'response' | 'responseText' | 'responseHeaders' | 'responseXML';
-}
+};
 
 type Metadata = { 
     percent: number; 
@@ -205,5 +215,11 @@ type Progress = {
     percent:string; 
     downloaded:string;
     speed?:string;
-    interval?:NodeJS.Timer;
+}
+
+type Images = {
+    start:number;
+    images:Image[];
+    [Symbol.asyncIterator]: ()=> AsyncGenerator<Image>
+
 }

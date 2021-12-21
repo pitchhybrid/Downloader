@@ -15,6 +15,16 @@ export class Cyberdrop extends Abstract {
                 this.images.push(new Image(name,item.href,index));
             }
         });
+        this.images = this.images.reverse().map((image:Image,index:number) =>{
+            image.index = index;
+            var idx: string | number = '' || index;
+            if (index <= 9) {
+                idx = '0' + index;
+            }
+            image.name = image.name.replace(/[\d]+$/,idx.toString());
+            ;
+            return image;
+        });
     }
 
 
