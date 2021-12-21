@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/webpack-env": "^1.16.3",
     "bluebird": "^3.7.2",
     "browser-mime": "^1.0.1",
     "file-saver": "^2.0.5",

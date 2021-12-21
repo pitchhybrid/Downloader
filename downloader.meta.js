@@ -18,6 +18,7 @@
 // @include      https://asiansister.com/view_*
 // @include      https://cyberdrop.me/a/*
 // @include      https://bunkr.is/a/*
+// @include      http://ryuryu.tw/*
 // @connect      cyberdrop.me
 // @connect      cyberdrop.to
 // @connect      zazhitaotu.cc

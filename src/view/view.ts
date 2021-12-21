@@ -216,10 +216,3 @@ type Progress = {
     downloaded:string;
     speed?:string;
 }
-
-type Images = {
-    start:number;
-    images:Image[];
-    [Symbol.asyncIterator]: ()=> AsyncGenerator<Image>
-
-}

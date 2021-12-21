@@ -1,3 +1,4 @@
+
 import { Zazhitaotou } from './view.zazhitaotu';
 import { Xinmeitulu } from './view.xinmeitulu';
 import { Dongtimini } from './view.dongtimimi';
@@ -5,7 +6,18 @@ import { Quxiezhen } from './view.quxiezhen';
 import { Asiansister } from './view.asiansister';
 import { Cyberdrop } from './view.cyberdrop';
 import { _8hko } from './view.8hko';
+import { Ryuryu } from './view.ryuryu';
 import { Abstract } from './view';
+const view = ( (ext) => {
+    let keys = ext.keys();
+    let values = keys.map(ext);
+    return values.reduce((accumulator:any,key:any,index) => ({
+       ...accumulator,
+       [key]:values[index]
+    }),{});
+})(require.context('./',true,/\*.ts/))
+
+console.log(view)
 
 export type Route = {
     View: (new () => Abstract);
@@ -49,5 +61,9 @@ export const routes: Route[] = [
         path: ['https://cyberdrop.me','https://bunkr.is'],
         enabled: true
     },
-    
+    {
+        View: Ryuryu,
+        path: ['http://ryuryu.tw'],
+        enabled: true
+    },
 ];
