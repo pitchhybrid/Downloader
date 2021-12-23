@@ -61,7 +61,6 @@ export abstract class Abstract {
     public addList(image: Image, progress: Tampermonkey.ProgressResponseBase): void {
         const cell: HTMLElement = image.getCell() // li;
         cell.title = image.src;
-        cell.style.color = 'white';
         var { percent,speed,downloaded } = this.info(progress);
         cell.innerHTML = `
             <p style="text-align: left; text-decoration: underline;"><a href="${image.src}" target="_blank">${image.name}</a></p>           

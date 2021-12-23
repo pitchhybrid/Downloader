@@ -1,4 +1,5 @@
 
+import { Abstract } from './view';
 import { Zazhitaotou } from './view.zazhitaotu';
 import { Xinmeitulu } from './view.xinmeitulu';
 import { Dongtimini } from './view.dongtimimi';
@@ -7,17 +8,7 @@ import { Asiansister } from './view.asiansister';
 import { Cyberdrop } from './view.cyberdrop';
 import { _8hko } from './view.8hko';
 import { Ryuryu } from './view.ryuryu';
-import { Abstract } from './view';
-const view = ( (ext) => {
-    let keys = ext.keys();
-    let values = keys.map(ext);
-    return values.reduce((accumulator:any,key:any,index) => ({
-       ...accumulator,
-       [key]:values[index]
-    }),{});
-})(require.context('./',true,/\*.ts/))
-
-console.log(view)
+import { Everia } from './view.everia';
 
 export type Route = {
     View: (new () => Abstract);
@@ -64,6 +55,11 @@ export const routes: Route[] = [
     {
         View: Ryuryu,
         path: ['http://ryuryu.tw'],
+        enabled: true
+    },
+    {
+        View: Everia,
+        path: ['https://everia.club'],
         enabled: true
     },
 ];

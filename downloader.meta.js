@@ -19,6 +19,7 @@
 // @include      https://cyberdrop.me/a/*
 // @include      https://bunkr.is/a/*
 // @include      http://ryuryu.tw/*
+// @include      /^https\:\/\/everia\.club\/\d+\/\d+\/\d+\/*
 // @connect      cyberdrop.me
 // @connect      cyberdrop.to
 // @connect      zazhitaotu.cc

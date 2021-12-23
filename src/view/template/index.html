@@ -11,12 +11,11 @@
         <button class="sidebar-header-button" style="float: right;margin: 0 20px;" id="mainBTN">下載</button>
     </div>
     <div class="sidebar-content">
-        <div class="mCustomScrollBox"
-            style="overflow-y: overlay;overflow-x: hidden; width: auto; height: 860px;padding: 15px;">
+        <div style="overflow-y: overlay;overflow-x: hidden; width: auto; height: 860px;padding: 15px;">
             <ul id="sidebarList" style="width: 100%;padding:0;"></ul>
-            <ul id="zipList" style="width: 100%;padding:0;"></ul>
-            <p id="zipProgress" class="progress-k" style="width: 0px"></p>
-            <p id="zipPercent" style="text-align: center;color: whitesmoke;"></p>
+            <ul id="zipList" style="width: 100%;padding:0; margin-top: 5px;"></ul>
+            <p id="zipProgress" class="progress-k" style="width: 0px; margin: 3px 0;"></p>
+            <p id="zipPercent" style="text-align: center;color: whitesmoke; padding: 3px 0;margin: 0;"></p>
         </div>
     </div>
     <div class="sidebar-btn" id="sidebarBTN">
@@ -25,6 +24,114 @@
 </div>
 
 <style>
+    .progress-k {
+        padding: 3px !important;
+        max-width: 99% !important;
+        background-color: #009688 !important;
+        border-radius: 2px;
+        height: 2.5px !important;
+    }
+
+    .read-section.sidebar-main {
+        width: 500px;
+    }
+
+    .sidebar-main {
+        position: fixed;
+        top: 30px;
+        bottom: 50px;
+        z-index: 100;
+    }
+
+    .read-section .sidebar-header {
+        border-top-right-radius: 4px;
+    }
+
+    .sidebar-header {
+        position: absolute;
+        width: 100%;
+        padding: 5px;
+        z-index: 10;
+        background: #333;
+    }
+
+    .sidebar-header-button {
+        display: inline-block;
+        line-height: 2.7;
+        padding: 0 1.6em;
+        color: #fff;
+        white-space: nowrap;
+        text-align: center;
+        border: 0;
+        border-radius: 5px;
+        vertical-align: middle;
+        background-color: inherit;
+        cursor: pointer;
+    }
+
+    .read-section .sidebar-content {
+        bottom: 0;
+        border-bottom-right-radius: 4px;
+    }
+
+    .sidebar-content {
+        overflow-x: hidden;
+        overflow-y: hidden;
+        position: absolute;
+        top: 40px;
+        right: 0;
+        left: 0;
+        background: #3c3c3c;
+    }
+
+    .read-section .sidebar-content li {
+        position: relative;
+        padding: 15px 0;
+        margin: 5px 0;
+        color: white;
+        width: 100%;
+        font-size: 16px;
+    }
+    
+    #zipList li {
+        padding: 5px 0;
+        color: white;
+        width: 100%;
+        font-size: 16px;
+    }
+
+    #zipList li > p{
+        padding: 0;
+        margin: 2px 0 !important;
+    }
+    .read-section .sidebar-content li > p{
+        padding: 0;
+        margin: 2px 0 !important;
+    }
+    .read-section .sidebar-content li > p > a{
+        color: white;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+    
+    .read-section .sidebar-btn {
+        right: -40px;
+        border-radius: 0 8px 8px 0;
+    }
+
+    .sidebar-btn {
+        position: absolute;
+        top: 50%;
+        width: 40px;
+        margin-top: -50px;
+        padding: 35px 0;
+        text-align: center;
+        font-size: 14px;
+        line-height: 16px;
+        color: #b0b0b0;
+        background: #3c3c3c;
+        cursor: pointer;
+    }
     .switch {
         position: relative;
         display: inline-block;
@@ -109,15 +216,6 @@
         border-radius: 50%;
     }
 
-    .progress-k {
-        padding: 3px;
-        width: 100%;
-        max-width: 99%;
-        background-color: #009688;
-        border-radius: 2px;
-        height: 2.5px;
-    }
-
     body::-webkit-scrollbar-track-piece,
     body ::-webkit-scrollbar-track-piece {
         background-color: transparent
@@ -141,117 +239,4 @@
     body ::-webkit-scrollbar-thumb:hover {
         background-color: #999
     }
-
-    .read-section.sidebar-main {
-        width: 500px;
-    }
-
-    .sidebar-main {
-        position: fixed;
-        top: 30px;
-        bottom: 50px;
-        z-index: 100;
-    }
-
-    .read-section .sidebar-header {
-        border-top-right-radius: 4px;
-    }
-
-    .sidebar-header {
-        position: absolute;
-        width: 100%;
-        padding: 5px;
-        z-index: 10;
-        background: #333;
-    }
-
-    .sidebar-header-button {
-        display: inline-block;
-        line-height: 2.7;
-        padding: 0 1.6em;
-        color: #fff;
-        white-space: nowrap;
-        text-align: center;
-        border: 0;
-        border-radius: 5px;
-        vertical-align: middle;
-        background-color: inherit;
-        cursor: pointer;
-    }
-
-    .read-section .sidebar-content {
-        bottom: 0;
-        border-bottom-right-radius: 4px;
-    }
-
-    .sidebar-content {
-        overflow-x: hidden;
-        overflow-y: hidden;
-        position: absolute;
-        top: 40px;
-        right: 0;
-        left: 0;
-        background: #3c3c3c;
-    }
-
-    .mCustomScrollBox {
-        position: relative;
-        overflow: hidden;
-        height: 100%;
-        max-width: 100%;
-        outline: 0;
-        direction: ltr;
-    }
-
-    .read-section .sidebar-content li {
-        position: relative;
-        padding: 15px 0;
-        color: white;
-    }
-
-    .read-section .sidebar-btn {
-        right: -40px;
-        border-radius: 0 8px 8px 0;
-    }
-
-    .sidebar-btn {
-        position: absolute;
-        top: 50%;
-        width: 40px;
-        margin-top: -50px;
-        padding: 35px 0;
-        text-align: center;
-        font-size: 14px;
-        line-height: 16px;
-        color: #b0b0b0;
-        background: #3c3c3c;
-        cursor: pointer;
-    }
-
-    /* 
-.sidebar-header-l {
-    position: absolute;
-    top: 0;
-    left: 10px;
-    font-size: 14px;
-    color: #fff;
-    font-style: normal;
-    cursor: pointer;
-    padding: 2px;
-    border: 1px solid rgb(95, 95, 95);
-    background-color: rgb(95, 95, 95);
-}
-
-.sidebar-header-r {
-    position: absolute;
-    top: 0;
-    right: 10px;
-    font-size: 14px;
-    color: #fff;
-    font-style: normal;
-    cursor: pointer;
-    padding: 2px;
-    border: 1px solid rgb(95, 95, 95);
-    background-color: rgb(95, 95, 95);
-} */
 </style>
