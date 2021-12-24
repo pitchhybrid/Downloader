@@ -2,10 +2,6 @@ import { Image } from '../model/image';
 import { Abstract } from './view';
 
 export class Xinmeitulu extends Abstract{
-    
-    constructor() {
-        super();
-    }
 
     public name(): string {
         return document.querySelector<HTMLElement>('.container>h1.h3').innerText;

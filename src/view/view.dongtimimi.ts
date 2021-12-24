@@ -2,10 +2,6 @@ import { Image } from '../model/image';
 import { Abstract } from './view';
 
 export class Dongtimini extends Abstract{
-    
-    constructor(){
-        super();
-    }
 
     public name(): string {
         return document.querySelector<HTMLElement>('header.entry-header>h1').innerText;

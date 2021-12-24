@@ -11,12 +11,12 @@
         <button class="sidebar-header-button" style="float: right;margin: 0 20px;" id="mainBTN">下載</button>
     </div>
     <div class="sidebar-content">
-        <div style="overflow-y: overlay;overflow-x: hidden; width: auto; height: 860px;padding: 15px;">
+        <div style="overflow-y: overlay;overflow-x: hidden; width: auto; height: 815px; padding: 5px 10px;">
             <ul id="sidebarList" style="width: 100%;padding:0;"></ul>
             <ul id="zipList" style="width: 100%;padding:0; margin-top: 5px;"></ul>
-            <p id="zipProgress" class="progress-k" style="width: 0px; margin: 3px 0;"></p>
-            <p id="zipPercent" style="text-align: center;color: whitesmoke; padding: 3px 0;margin: 0;"></p>
         </div>
+        <p id="zipProgress" class="progress-k" style="width: 0px; margin: 3px 0;"></p>
+        <p id="zipPercent" style="text-align: center;color: whitesmoke; padding: 3px 0;margin: 0;"></p>
     </div>
     <div class="sidebar-btn" id="sidebarBTN">
         章<br>节
@@ -25,7 +25,6 @@
 
 <style>
     .progress-k {
-        padding: 3px !important;
         max-width: 99% !important;
         background-color: #009688 !important;
         border-radius: 2px;
@@ -69,6 +68,11 @@
         cursor: pointer;
     }
 
+    .sidebar-header-button:hover{
+        background-color: inherit;
+        color: #fff;
+    }
+
     .read-section .sidebar-content {
         bottom: 0;
         border-bottom-right-radius: 4px;
@@ -91,6 +95,7 @@
         color: white;
         width: 100%;
         font-size: 16px;
+        cursor: pointer;
     }
     
     #zipList li {
@@ -107,8 +112,6 @@
     .read-section .sidebar-content li > p{
         padding: 0;
         margin: 2px 0 !important;
-    }
-    .read-section .sidebar-content li > p > a{
         color: white;
         white-space: nowrap;
         text-overflow: ellipsis;

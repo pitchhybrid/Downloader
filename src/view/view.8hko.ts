@@ -3,10 +3,6 @@ import { Abstract} from './view';
 
 export class _8hko extends Abstract{
 
-    constructor(){
-        super();
-    }
-
     public name(): string {
         var a:HTMLElement = document.querySelector<HTMLElement>('.f-22.mb5');
         if(a == null){

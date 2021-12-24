@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Downloader
-// @version      0.0.1
+// @version      1.0-alpla
 // @description  Download Images archive as zip/cbz file
 // @author       PitchHybrid
 // @icon         https://en.gravatar.com/userimage/65036773/2dd58af4a47f9a4a27ad4184347fb326.jpg
@@ -39,7 +39,7 @@
 // @grant        GM_info
 // @grant        GM.getValue
 // @grant        GM.setValue
-// @grant        GM.xmlHttpRequest
 // @grant        GM.info
+// @grant        GM_notification
 // ==/UserScript==
 

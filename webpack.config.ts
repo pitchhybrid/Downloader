@@ -4,6 +4,7 @@ import {Configuration} from 'webpack';
 const config: Configuration = {
   mode: "development",
   entry: resolve(__dirname, './src/index.ts'),
+  devtool:'eval-source-map',
   stats:{
     warnings:false,
     cached:false

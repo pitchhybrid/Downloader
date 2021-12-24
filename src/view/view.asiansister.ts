@@ -2,11 +2,7 @@ import { Image } from '../model/image';
 import { Abstract } from './view';
 
 export class Asiansister extends Abstract {
-
-    constructor(){
-        super();
-    }
-
+    
     public name(): string {
         return document.querySelector<HTMLElement>('.second_contant>center').innerText;
     }

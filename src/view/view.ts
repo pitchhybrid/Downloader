@@ -5,7 +5,6 @@ import JSZip = require('jszip');
 import {sizeOf,file} from './../utils/utils';
 
 export abstract class Abstract {
-    private div: HTMLDivElement = document.createElement('div');
     private sidebar: HTMLElement;
     private mainBTNEl: HTMLElement;
     private title: HTMLElement;
@@ -21,8 +20,7 @@ export abstract class Abstract {
     public fails:Set<Image> = new Set<Image>();
 
     constructor() {
-        this.div.innerHTML = require('./template/index.html').default;
-        document.body.appendChild(this.div);
+        document.body.insertAdjacentHTML('afterbegin',require('./template/index.html').default);
         this.sidebar = document.getElementById('templateSideBar');
         this.list = document.getElementById('sidebarList');
         this.mainBTNEl = document.getElementById('mainBTN');
@@ -53,7 +51,7 @@ export abstract class Abstract {
                 var toggle:boolean = (document.getElementById('btnZipCbz') as HTMLInputElement).checked;
                 saveAs(stream, name + (toggle ? '.cbz' : '.zip'));
             } catch (error) {
-                console.log(error)
+                GM_notification({text:error});
             }
         });
     }
@@ -61,12 +59,13 @@ export abstract class Abstract {
     public addList(image: Image, progress: Tampermonkey.ProgressResponseBase): void {
         const cell: HTMLElement = image.getCell() // li;
         cell.title = image.src;
+        cell.onclick = () => this.debug(image.index);
         var { percent,speed,downloaded } = this.info(progress);
         cell.innerHTML = `
-            <p style="text-align: left; text-decoration: underline;"><a href="${image.src}" target="_blank">${image.name}</a></p>           
-            <p class="progress-k" style="width: ${percent}"></p>
+            <p style="text-align: left; text-decoration: underline;">${image.name}</p>           
+            <p class="progress-k" style="width: ${percent};"></p>
             <p><small style="float:left">${downloaded} (${percent})</small><small style="float:right">${speed}</small></p>`;
-        cell.getElementsByTagName('a')[0].onclick = () => this.debug(image.index);
+        (cell.getElementsByClassName('progress-k')[0] as HTMLElement).style.padding = '3px';
         this.list.appendChild(cell);
     }
 
@@ -110,7 +109,14 @@ export abstract class Abstract {
     }
 
     public debug(index:number){
-        console.log(this.images[index]);
+        var el:Image = this.images[index];
+        GM_notification({
+            text:el.name + ' ' + (el.done ? 'Download':'Downloading'),
+            onclick:():void => {
+                console.log(el)
+                window.open(el.src,'_blank')
+            }
+        })
     }
 
     public button(f: (e: PointerEvent) => void): void {
@@ -155,6 +161,7 @@ export abstract class Abstract {
                     yield image
                 } catch (error) {
                     image.done = false;
+                    GM_notification({text:error});
                 }
             }while(!image.done);
         }

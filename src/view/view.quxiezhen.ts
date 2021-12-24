@@ -2,10 +2,6 @@ import { Image } from '../model/image';
 import { Abstract } from './view'
 export class Quxiezhen extends Abstract {
     
-    constructor(){
-        super();
-    }
-    
     public name(): string {
         var a:HTMLElement = document.querySelector<HTMLElement>('.item_title>h1');
         if(a == null || undefined){
