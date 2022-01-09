@@ -10,11 +10,9 @@
         <p id="headerDownloader" style="text-align: center;color: #fff;position: absolute; right: 45%; top: 4px;padding: 5px;"></p>
         <button class="sidebar-header-button" style="float: right;margin: 0 20px;" id="mainBTN">下載</button>
     </div>
-    <div class="sidebar-content">
-        <div style="overflow-y: overlay;overflow-x: hidden; width: auto; height: 815px; padding: 5px 10px;">
-            <ul id="sidebarList" style="width: 100%;padding:0;"></ul>
-            <ul id="zipList" style="width: 100%;padding:0; margin-top: 5px;"></ul>
-        </div>
+    <div class="sidebar-content" style="overflow-y: overlay;overflow-x: hidden; width: auto; height: 815px; padding: 10px 10px;">
+        <ul id="sidebarList" style="width: 100%;padding:0;"></ul>
+        <ul id="zipList" style="width: 100%;padding:0; margin-top: 5px;"></ul>
         <p id="zipProgress" class="progress-k" style="width: 0px; margin: 3px 0;"></p>
         <p id="zipPercent" style="text-align: center;color: whitesmoke; padding: 3px 0;margin: 0;"></p>
     </div>
@@ -26,7 +24,7 @@
 <style>
     .progress-k {
         max-width: 99% !important;
-        background-color: #009688 !important;
+        background-color: #009688;
         border-radius: 2px;
         height: 2.5px !important;
     }
@@ -109,7 +107,7 @@
         padding: 0;
         margin: 2px 0 !important;
     }
-    .read-section .sidebar-content li > p{
+    .read-section .sidebar-content ul > li > p{
         padding: 0;
         margin: 2px 0 !important;
         color: white;

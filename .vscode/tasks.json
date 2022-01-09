@@ -1,0 +1,16 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "build",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": [],
+			"label": "npm: build",
+			"detail": "webpack && cat ./downloader.meta.js > ./dist/downloader.user.js && cat ./dist/bundle.js >> ./dist/downloader.user.js"
+		}
+	]
+}

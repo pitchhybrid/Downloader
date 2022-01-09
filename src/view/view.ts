@@ -3,6 +3,7 @@ import { Image } from './../model/image';
 import { saveAs } from 'file-saver';
 import JSZip = require('jszip');
 import {sizeOf,file} from './../utils/utils';
+import { ids } from 'webpack';
 
 export abstract class Abstract {
     private sidebar: HTMLElement;
@@ -56,41 +57,67 @@ export abstract class Abstract {
         });
     }
 
+    private scroolList(cell:HTMLElement):void{
+        this.list.appendChild(cell);
+        const parent:HTMLElement = this.list.parentNode as HTMLElement;
+        parent.scrollTop = parent.scrollHeight;
+    }
+
     public addList(image: Image, progress: Tampermonkey.ProgressResponseBase): void {
         const cell: HTMLElement = image.getCell() // li;
         cell.title = image.src;
-        cell.onclick = () => this.debug(image.index);
+        cell.onclick = (ev:MouseEvent) => {
+            if(image.done)
+                this.notify(image.index);
+            ev.preventDefault();
+        };
         var { percent,speed,downloaded } = this.info(progress);
         cell.innerHTML = `
             <p style="text-align: left; text-decoration: underline;">${image.name}</p>           
             <p class="progress-k" style="width: ${percent};"></p>
             <p><small style="float:left">${downloaded} (${percent})</small><small style="float:right">${speed}</small></p>`;
         (cell.getElementsByClassName('progress-k')[0] as HTMLElement).style.padding = '3px';
-        this.list.appendChild(cell);
+        this.scroolList(cell);
+    }
+
+    public addErrorList(image: Image,retry:number): void {
+        const cell: HTMLElement = image.getCell() // li;
+        cell.title = image.src;
+        cell.onclick = (ev:MouseEvent) => {
+            if(!image.done)
+                this.notify(image.index);
+            ev.preventDefault();
+        };
+        cell.innerHTML = `
+            <p style="text-align: left; text-decoration: underline;">${image.name}</p>           
+            <p class="progress-k" style="width: 100%;"></p>
+            <p><small style="float:left; color: #ca2222;">Error:. Unstable Server</small><small style="float:right">retry:. ${retry}</small></p>`;
+        const style:CSSStyleDeclaration = (cell.getElementsByClassName('progress-k')[0] as HTMLElement).style;
+        style.padding = '3px';
+        style.backgroundColor = '#ca2222';
+        this.scroolList(cell);
     }
 
     private info(progress: Tampermonkey.ProgressResponseBase):Progress{
+        
+        this.speed.push(progress.loaded);
+
         const data:Progress = {
             percent: `${((progress.loaded / progress.totalSize) * 100).toFixed(2)}%`,
             downloaded: `${sizeOf(progress.loaded)} of ${sizeOf(progress.totalSize)}`,
         };
-       
-        if(this.speed.length > 10){
-            data.speed = `${sizeOf(progress.loaded - this.speed[this.speed.length - 10])}/s`;
-        }else{
-            data.speed = `${sizeOf(progress.loaded)}/s`
-        }
+        
+        data.speed = this.speed.length > 10 ? `${sizeOf(progress.loaded - this.speed[this.speed.length - 10])}/s`:`${sizeOf(progress.loaded)}/s`;
+        
         return data;
     }
 
     private getLi(title:string):HTMLLIElement{
         var els = this.zipEls[title];
-        if(els){
+        if(els)
             return this.zipEls[title];
-        }else{
-            this.zipEls[title] = document.createElement('li');
-            return this.zipEls[title];
-        }
+        else
+            return this.zipEls[title] = document.createElement('li');
     }
 
     public addZipProgress(progress:Metadata){
@@ -108,10 +135,10 @@ export abstract class Abstract {
         }
     }
 
-    public debug(index:number){
+    public notify(index:number): void{
         var el:Image = this.images[index];
         GM_notification({
-            text:el.name + ' ' + (el.done ? 'Download':'Downloading'),
+            text:el.name + ' ' + el.src,
             onclick:():void => {
                 console.log(el)
                 window.open(el.src,'_blank')
@@ -140,76 +167,84 @@ export abstract class Abstract {
         }
     }
 
-    public async * [Symbol.asyncIterator](): AsyncGenerator<Image, void, unknown>{
-        var index = 0;
-        while( this.images[index] != undefined ) {
-            const image:Image = this.images[index];
-            do{
-                this.speed = [];
-                try {
-                    image.blob = await this.download<Blob>(image.src, {
-                        onprogress: (event: Tampermonkey.ProgressResponseBase) => {
-                            this.speed.push(event.loaded);
-                            this.addList(image, event);
-                            this.title.innerHTML = `<small>${this.list.childElementCount} of ${this.images.length}</small>`;
-                            const parent:HTMLElement = this.list.parentNode as HTMLElement;
-                            parent.scrollTop = parent.scrollHeight;
-                        }
-                    });
-                    index++;
-                    image.done = true;
-                    yield image
-                } catch (error) {
-                    image.done = false;
-                    GM_notification({text:error});
-                }
-            }while(!image.done);
-        }
+    public async * [Symbol.asyncIterator](): AsyncGenerator<Image>{
+       for(var i = 0; i < this.images.length; i++ ){
+           var retry = 1;
+           if(!this.images[i].done){
+               do{
+                   this.speed = [];
+                   try {
+                    this.images[i].blob = await this.download<Blob>(
+                        this.images[i].src,
+                        {
+                            onprogress: (event: Tampermonkey.ProgressResponse<Blob>): void => {
+                                this.addList(this.images[i], event);
+                                this.title.innerHTML = `<small>${this.list.childElementCount} of ${this.images.length}</small>`;
+                            }
+                        });
+                        this.images[i].done = true;
+                        yield this.images[i]
+                   } catch (error) {
+                        this.addErrorList(this.images[i],retry);
+                        this.images[i].done = false;
+                        console.error(error)
+                        retry++
+                   }
+               }while(!this.images[i].done && retry <= 5);
+           }
+       }
     }
 
     public async processar(progress?:(progress:Metadata) => void): Promise<Blob>{
         for await (const image of this){
-            this.folder.file(file(image), image.blob);
+            if(image.done){
+                this.folder.file(file(image), image.blob);
+            }
         }
         return this.zip.generateAsync({ type: 'blob', comment: window.location.href }, progress);
     }
 
-    public download<T extends Blob | string | ArrayBuffer>(url: string, 
+    public download<T>(url: string, 
         { onprogress,
             method = 'GET',
             prop = 'response', 
             responseType = 'blob',
-            timeout = 0
-        }: Download): Promise<T> {
+            timeout = 0,
+        }: Download<T>): Promise<T> {
         
         return new Promise((resolve: (value: T | PromiseLike<T>) => void, reject: (reason?:any ) => void): void => {
             GM_xmlhttpRequest<T>({ method, url, responseType, timeout,
                 onprogress,
-                onload: (xml: Tampermonkey.ResponseBase) => {
+                revalidate:true,
+                onload: (xml: Tampermonkey.Response<T>) => {
+                    if(xml.readyState != 4){
+                        return;
+                    }
                     if (xml.status == 200)
                         resolve(xml[prop]);
                     else
                         reject(xml.statusText);
                 },
-                revalidate:true,
-                onerror:(error:Tampermonkey.ErrorResponse) =>{
+                onerror:(error:Tampermonkey.ErrorResponse) => {
                     reject(error);
                 },
                 ontimeout:()=>{
                     reject('timeout')
+                },
+                onabort:() =>{
+                    reject('abort')
                 }
             });
-            
         });
     }
 }
 
-type Download = {
+type Download<T> = {
     method?: 'GET' | 'POST';
-    responseType?: 'blob' | 'json' | 'arraybuffer';
-    onprogress?: (event: Tampermonkey.ProgressResponseBase) => void;
+    responseType?: 'blob' | 'json' | 'arraybuffer' | undefined;
+    onprogress?: (event: Tampermonkey.ProgressResponse<T>) => void;
     timeout?:number;
-    prop?: 'response' | 'responseText' | 'responseHeaders' | 'responseXML';
+    prop?: 'response' | 'responseText' | 'responseHeaders' | 'responseXML' | 'context';
 };
 
 type Metadata = { 

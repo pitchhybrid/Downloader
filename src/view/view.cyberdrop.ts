@@ -17,12 +17,12 @@ export class Cyberdrop extends Abstract {
         });
         this.images = this.images.reverse().map((image:Image,index:number) =>{
             image.index = index;
+            index = index + 1;
             var idx: string | number = '' || index;
             if (index <= 9) {
                 idx = '0' + index;
             }
             image.name = image.name.replace(/[\d]+$/,idx.toString());
-            ;
             return image;
         });
     }

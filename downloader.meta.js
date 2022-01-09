@@ -37,9 +37,10 @@
 // @grant        GM_setValue
 // @grant        GM_xmlhttpRequest
 // @grant        GM_info
+// @grant        GM_notification
 // @grant        GM.getValue
 // @grant        GM.setValue
 // @grant        GM.info
-// @grant        GM_notification
+// @grant        GM.notification
 // ==/UserScript==
 
