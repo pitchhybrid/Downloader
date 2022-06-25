@@ -11,3 +11,13 @@ export function sizeOf(bytes:number): string {
 export function file(image:Image): string {
     return image.name + '.' + mime.extension(image.blob.type);
 }
+
+export function toMatrix <T> (array:T[], qtd:number = 3): T[][]{
+    var matrix: T[][] = [];
+    for (var i = 0;i<array.length;i++){
+        var c = i + qtd;
+        matrix.push(array.slice(i,c));
+        i = c - 1;
+    }
+    return matrix;
+}

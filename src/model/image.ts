@@ -5,6 +5,8 @@ export class Image {
     public blob?:Blob;
     public done:boolean = false;
     private tr: HTMLElement;
+    public speed:number[] = [];
+    public retry:number = 1;
 
     constructor(name: string, src: string, index: number) {
         this.index = index;

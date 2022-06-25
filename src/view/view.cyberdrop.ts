@@ -8,13 +8,23 @@ export class Cyberdrop extends Abstract {
     }
     public queryLinksImages(): void | [Image] {
         var name:string = this.name();
-        document.querySelectorAll<HTMLAnchorElement>('a.image').forEach((item:HTMLAnchorElement,index:number)=>{
-            if(window.origin == 'https://bunkr.is' && (item.href.endsWith('.mp4') || item.href.endsWith('.MP4'))){
-                this.images.push(new Image(name,item.href.replace('https://cdn.bunkr.is','https://stream.bunkr.is/d'),index));
-            }else{
-                this.images.push(new Image(name,item.href,index));
+        if(window.origin == 'https://bunkr.is'){
+            const {innerText} = document.getElementById("__NEXT_DATA__");
+            const {props:{pageProps:{files}}} = JSON.parse(innerText);
+
+            for (const i in files){
+                var link:{name:string; size:string; timestamp:number; cdn:string; i:string} = files[i];
+                this.images.push(new Image(name,(link.name.toLowerCase().endsWith('.mp4') ? 'https://media-files.bunkr.is':link.cdn) + '/' + link.name,Number.parseInt(i)));
             }
-        });
+        }else{
+            document.querySelectorAll<HTMLAnchorElement>('a.image').forEach((item:HTMLAnchorElement,index:number)=>{
+                if(window.origin == 'https://bunkr.is' && (item.href.endsWith('.mp4') || item.href.endsWith('.MP4'))){
+                    this.images.push(new Image(name,item.href.replace('https://cdn.bunkr.is','https://media-files.bunkr.is'),index));
+                }else{
+                }
+                this.images.push(new Image(name,item.href,index));
+            });
+        }
         this.images = this.images.reverse().map((image:Image,index:number) =>{
             image.index = index;
             index = index + 1;

@@ -12,6 +12,7 @@
       "scripthost",
       "webworker",
       "es5",
+      "es6",
       "esnext.asynciterable"
      ],
   },
