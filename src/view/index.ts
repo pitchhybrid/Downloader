@@ -43,16 +43,6 @@ export const routes: Route[] = [
         enabled: true
     },
     {
-        View: Asiansister,
-        path: [],
-        enabled: true
-    },
-    {
-        View: Cyberdrop,
-        path: [],
-        enabled: true
-    },
-    {
         View: Ryuryu,
         path: [],
         enabled: true
