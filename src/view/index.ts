@@ -19,47 +19,47 @@ export type Route = {
 export const routes: Route[] = [
     {
         View: Zazhitaotou,
-        path: ['https://zazhitaotu.cc', 'https://tu.acgbox.org'],
+        path: [],
         enabled: true
     },
     {
         View: _8hko,
-        path: ['https://www.shenzhenyezi.com', 'https://8hko.com', 'https://palaxe.com','https://www.92saobao.com','https://www.wooden-specialties.com','https://www.nrvjeepclub.com'],
+        path: [],
         enabled: true
     },
     {
         View: Xinmeitulu,
-        path: ['https://www.xinmeitulu.com', 'https://www.twlegs.com'],
+        path: [],
         enabled: true
     },
     {
         View: Dongtimini,
-        path: ['https://dongtimimi.com'],
+        path: [],
         enabled: true
     },
     {
         View: Quxiezhen,
-        path: ['https://www.quxiezhen.com'],
+        path: [],
         enabled: true
     },
     {
         View: Asiansister,
-        path: ['https://asiansister.com'],
+        path: [],
         enabled: true
     },
     {
         View: Cyberdrop,
-        path: ['https://cyberdrop.me','https://bunkr.is'],
+        path: [],
         enabled: true
     },
     {
         View: Ryuryu,
-        path: ['http://ryuryu.tw'],
+        path: [],
         enabled: true
     },
     {
         View: Everia,
-        path: ['https://everia.club'],
+        path: [],
         enabled: true
     },
 ];
